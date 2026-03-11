@@ -4,8 +4,15 @@ int latch = 16;
 int clockPin = 17;
 int dataSerial = 18;
 int powerPin = 19;
+
+unsigned long letzteLichtZeit = 0;
+unsigned long letzteTasterZeit = 0;
+int lichtIntervall = 200;
+int tasterIntervall = 30;
+
 bool speicher = false;
 bool anSignal = true;
+int counter = 0;
 
 void setup() {
   pinMode(latch, OUTPUT);
@@ -15,20 +22,23 @@ void setup() {
 }
 
 void loop() {
-  if(anSignal == true) {
-    for (int i= 0; i < 8; i++) {
-    digitalWrite(latch, LOW);
-    shiftOut(dataSerial, clockPin, MSBFIRST, 1 << i);
-    digitalWrite(latch, HIGH);
-    delay(200);
-    }
-  }
+  unsigned long jetzt = millis();
 
-  if(!digitalRead(powerPin) && !speicher) {
+  bool tasterGedrueckt = !digitalRead(powerPin);
+
+  if(tasterGedrueckt && !speicher && (jetzt - letzteTasterZeit > tasterIntervall)) {
     anSignal = !anSignal;
+    letzteTasterZeit = millis();
+    speicher = tasterGedrueckt;
   }
-  speicher = !digitalRead(powerPin);
-  delay(50);
+  
 
+  if(anSignal && (jetzt - letzteLichtZeit > lichtIntervall)) {
+    digitalWrite(latch, LOW);
+    shiftOut(dataSerial, clockPin, MSBFIRST, 1 << counter);
+    digitalWrite(latch, HIGH);
+    counter = (counter + 1) % 8;
+    letzteLichtZeit = millis();
+  }
 
 }
