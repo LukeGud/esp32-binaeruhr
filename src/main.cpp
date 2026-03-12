@@ -45,4 +45,10 @@ void loop() {
     letzteLichtZeit = jetzt;
   }
 
+  if(!anSignal) {
+    digitalWrite(latch, LOW);
+    shiftOut(dataSerial, clockPin, MSBFIRST, 0);
+    digitalWrite(latch, HIGH);
+  }
+
 }
