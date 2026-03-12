@@ -23,22 +23,26 @@ void setup() {
 
 void loop() {
   unsigned long jetzt = millis();
-
   bool tasterGedrueckt = !digitalRead(powerPin);
 
-  if(tasterGedrueckt && !speicher && (jetzt - letzteTasterZeit > tasterIntervall)) {
-    anSignal = !anSignal;
-    letzteTasterZeit = millis();
+  if ((jetzt - letzteTasterZeit > tasterIntervall) && tasterGedrueckt != speicher) {
+    
+    letzteTasterZeit = jetzt;
     speicher = tasterGedrueckt;
+
+    if (tasterGedrueckt)
+    {
+      anSignal = !anSignal;
+    }
+    
   }
-  
 
   if(anSignal && (jetzt - letzteLichtZeit > lichtIntervall)) {
     digitalWrite(latch, LOW);
     shiftOut(dataSerial, clockPin, MSBFIRST, 1 << counter);
     digitalWrite(latch, HIGH);
     counter = (counter + 1) % 8;
-    letzteLichtZeit = millis();
+    letzteLichtZeit = jetzt;
   }
 
 }
