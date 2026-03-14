@@ -13,16 +13,13 @@ int dataSerial = 18;
 int powerPin = 19;
 
 //Debounce + Intervalle
-unsigned long letzteLichtZeit = 0;
 unsigned long letzteTasterZeit = 0;
 unsigned long letzteUhrzeit = 0;
-int lichtIntervall = 200;
 int tasterIntervall = 30;
 
 //Variablen
 bool speicher = false;
 bool anSignal = true;
-int counter = 0;
 
 void setup() {
   Serial.begin(115200);
@@ -64,13 +61,12 @@ void loop() {
     }
   }
 
-  if (anSignal && (jetzt - letzteLichtZeit > lichtIntervall)) {
+  if (anSignal) {
+    struct tm zeitInfo;
+    getLocalTime(&zeitInfo);
     digitalWrite(latch, LOW);
-    shiftOut(dataSerial, clockPin, MSBFIRST, 1 << counter);
+    shiftOut(dataSerial, clockPin, MSBFIRST,  + zeitInfo.tm_sec);
     digitalWrite(latch, HIGH);
-
-    counter = (counter + 1) % 8;
-    letzteLichtZeit = jetzt;
   }
 
   if (!anSignal) {
